@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 android {
 	compileSdkVersion 22
@@ -18,9 +20,85 @@ android {
 
 }
 
+dependencies {
+    compile project(':usbSerialForAndroid')
+}
+
 group = "org.shokai.firmata"
 version = "0.3.0-SNAPSHOT"
 
-dependencies {
-    compile project(':usbSerialForAndroid')
+configurations {
+    archives {
+        extendsFrom configurations.default
+    }
+}
+
+signing {
+    required { hasProperty("release") && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+def getRepositoryUsername() {
+    return hasProperty('sonatypeUsername') ? sonatypeUsername : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('sonatypePassword') ? sonatypePassword : ""
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+uploadArchives {
+    def sonatypeRepositoryUrl
+    if (isReleaseBuild()) {
+        println 'RELEASE BUILD'
+        sonatypeRepositoryUrl = hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+                : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+    } else {
+        println 'SNAPSHOT BUILD'
+        sonatypeRepositoryUrl = hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+                : "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: sonatypeRepositoryUrl) {
+            authentication(userName: getRepositoryUsername(),
+                    password: getRepositoryPassword())
+        }
+
+        pom.artifactId = 'arduino-firmata-android'
+        pom.project {
+            name 'arduino-firmata-android'
+            packaging 'aar'
+            description 'USB Serial Driver Library for Android'
+            url 'https://github.com/joebotics/arduino-firmata-android'
+
+            scm {
+                url 'scm:git@github.com:mik3y/usb-serial-for-android.git'
+                connection 'scm:git@github.com:joebotics/arduino-firmata-android.git'
+                developerConnection 'scm:git@github.com:joebotics/arduino-firmata-android.git'
+            }
+
+            licenses {
+                license {
+                    name 'MIT'
+                    url 'https://opensource.org/licenses/MIT'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'joebotics'
+                    name 'joebotics'
+                    email 'info@joebotics.com'
+                }
+            }
+        }
+    }
 }
