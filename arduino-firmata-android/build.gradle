@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+android {
+	compileSdkVersion 22
+    buildToolsVersion '26.0.2'
+        
+    defaultConfig {
+        minSdkVersion 12
+        targetSdkVersion 19
+    }
+
+    buildTypes {
+       release {
+           minifyEnabled false
+           proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+       }
+    }
+
+}
+
+group = "org.shokai.firmata"
+version = "0.3.0-SNAPSHOT"
+
+dependencies {
+    compile project(':usbSerialForAndroid')
+}

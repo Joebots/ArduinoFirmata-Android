@@ -1,0 +1,2 @@
+include ':arduino-firmata-android', ':usbSerialForAndroid'
+project(':usbSerialForAndroid').projectDir = new File('usb-serial-for-android/usbSerialForAndroid')
