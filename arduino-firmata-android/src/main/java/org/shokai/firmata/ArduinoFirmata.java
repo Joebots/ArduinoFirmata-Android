@@ -90,7 +90,7 @@ public class ArduinoFirmata {
             }
             this.port = port;
             port.open(connection);
-            port.setParameters(115200, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            port.setParameters(57600, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             throw e;
